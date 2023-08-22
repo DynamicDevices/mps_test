@@ -11,6 +11,7 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/settings/settings.h>
+#include <zephyr/drivers/gpio.h>
 
 #include <openthread/platform/logging.h>
 #include <openthread/instance.h>
@@ -26,6 +27,24 @@
 #include <bluetooth/scan.h>
 
 LOG_MODULE_REGISTER(main, 4);
+
+static const struct gpio_dt_spec led_yellow = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
+void ledHandler(struct k_timer *dummy);
+void ledWorkHandler(struct k_work *work);
+static K_TIMER_DEFINE(ledTimer, ledHandler, NULL);
+static K_WORK_DEFINE(ledWork, ledWorkHandler);
+
+void ledHandler(struct k_timer *dummy)
+{
+	k_work_submit(&ledWork);
+}
+
+void ledWorkHandler(struct k_work *work)
+{
+	gpio_pin_toggle_dt(&led_yellow);
+    k_timer_start(&ledTimer, K_SECONDS(1), K_NO_WAIT);
+}
+
 
 int8_t datahex(char* string, uint8_t *data, int8_t len) 
 {
@@ -85,14 +104,11 @@ struct bt_scan_init_param p_scan_init = {
 
 static void scan_init(void)
 {
-	int err;
-
-
 	bt_scan_init(&p_scan_init);
 //	bt_scan_cb_register(&scan_cb);
 
 #if 0
-	err = bt_scan_filter_add(BT_SCAN_FILTER_TYPE_UUID, BT_UUID_LNS);
+	int err = bt_scan_filter_add(BT_SCAN_FILTER_TYPE_UUID, BT_UUID_LNS);
 	if (err) {
 		LOG_WRN("Scanning filters cannot be set (err %d)", err);
 
@@ -208,6 +224,10 @@ int main(void)
 	}
 
 	LOG_INF("Scanning successfully started\n");
+
+	// Toggle yellow LED on dongle so we can see it's working
+	gpio_pin_configure_dt(&led_yellow, GPIO_OUTPUT_ACTIVE);
+    k_timer_start(&ledTimer, K_SECONDS(1), K_NO_WAIT);
 
 	return 0;
 }
