@@ -19,8 +19,8 @@ We are building against a vanilla installation of Nordic nRF Connect SDK v2.4.0
 
 Under test this fails in a few seconds - 20 seconds
 
-To make it fail I can also do a ping e.g. to an OTBR address
+To make it fail I can also do a ping e.g. to an OTBR address or Google DNS
 
 ```
-ot ping fe80::1c48:7f40:6b2f:5d54
+ot ping 8.8.8.8
 ```
