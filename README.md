@@ -8,3 +8,4 @@ This example shows a simple test case for the nRF52840 Dongle which
 
 Build for the nrf52840dongle_nrf52840 and program with the Nordic Programming Tool
 
+Under test this fails in a few seconds
